@@ -286,20 +286,6 @@ declare -a queries=(
     "Groups with Foreign Controllers;MATCH (g:Group {domain:'$DOMAIN'}) OPTIONAL MATCH (n)-[{isacl:true}]->(g) WHERE (n:User OR n:Computer) AND NOT n.domain = g.domain OPTIONAL MATCH (m)-[:MemberOf*1..]->(:Group)-[{isacl:true}]->(g) WHERE (m:User OR m:Computer) AND NOT m.domain = g.domain WITH COLLECT(n) + COLLECT(m) AS tempVar,g UNWIND tempVar AS foreignGroupControllers RETURN g.name,COUNT(DISTINCT(foreignGroupControllers)) ORDER BY COUNT(DISTINCT(foreignGroupControllers)) DESC;GroupswithForeignControllers.csv"
     "All Objects in Domain;MATCH (n {domain:'$DOMAIN'}) RETURN n.name AS Name, n.displayname AS DisplayName, n.objectid AS SID;AllObjectsInDomain.csv"
     "Users with the cleartext UserPassword field populated;MATCH (u:User {domain:'$DOMAIN'}) WHERE u.userpassword IS NOT NULL RETURN u.displayname,u.userpassword;UserPassword.csv"
-    # Custom queries for CIOTE
-    "Find users with passwords last set within the last 90 days;MATCH (u:User) WHERE u.pwdlastset < (datetime().epochseconds - (90 * 86400)) and NOT u.pwdlastset IN [-1.0, 0.0] RETURN u;UsersPasswordChangeWithinLast90Days.csv"
-    "Find users with passwords last set more than 90 days;MATCH (u:User) WHERE u.pwdlastset > (datetime().epochseconds - (90 * 86400)) and NOT u.pwdlastset IN [-1.0, 0.0] RETURN u;UsersPasswordChangeMoreThan90Days.csv"
-    "Return the name of every computer in the database where at least one SPN for the computer contains the string 'MSSQL';MATCH (c:Computer) WHERE ANY (x IN c.serviceprincipalnames WHERE toUpper(x) CONTAINS 'MSSQL') RETURN c;SPNWhereSQL.csv"
-    "Return the name of every computer in the database where at least one SPN for the computer contains the string 'MSEXC';MATCH (c:Computer) WHERE ANY (x IN c.serviceprincipalnames WHERE toUpper(x) CONTAINS 'MSEXC') RETURN c;SPNWhereEXCH.csv"
-    "Find All Groups with Admin in the Name;Match (n:Group) WHERE n.name CONTAINS 'ADMIN' RETURN n;GroupsWithAdminInTheName.csv"
-    "Find groups that contain both users and computers;MATCH (c:Computer)-[r:MemberOf*1..]->(groupsWithComps:Group) WITH groupsWithComps MATCH (u:User)-[r:MemberOf*1..]->(groupsWithComps) RETURN DISTINCT(groupsWithComps) as groupsWithCompsAndUsers;groupsWithCompsAndUsers.csv"
-    "Find if any domain user has interesting permissions against a GPO;MATCH p=(u:User)-[r:AllExtendedRights|GenericAll|GenericWrite|Owns|WriteDacl|WriteOwner|GpLink*1..]->(g:GPO) RETURN p;DomainUserswithPoweroverGPO.cvs"
-    "Find users that have never logged on and account is still active;MATCH (n:User) WHERE n.lastlogontimestamp=-1.0 AND n.enabled=TRUE RETURN n;ActiveAccountsNeverLoggedOn.csv"
-
-
-
-
-    
 )
 
 toolCheck
